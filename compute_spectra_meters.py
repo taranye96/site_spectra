@@ -178,8 +178,8 @@ for i in range(len(event_dirs)):
                 data_NE = data_NE/(np.exp(-np.pi*rhyp*freq_NE/Q*B))
                 
                 #0.1-end
-                bins, binned_data = bin_spec(data_NE[6:-1], freq[6:-1], num_bins=nbins)
-                bins_sig, binned_sig = bin_max_err(sigma[6:-1], freq[6:-1], num_bins=nbins)
+                bins, binned_data = bin_spec(data_NE[6:-1], freq_NE[6:-1], num_bins=nbins)
+                bins_sig, binned_sig = bin_max_err(sigma[6:-1], freq_NE[6:-1], num_bins=nbins)
 
                 #make sure that all spec is a number
                 if (np.isnan(binned_data).any() == False):

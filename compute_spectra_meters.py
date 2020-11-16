@@ -30,15 +30,15 @@ import time
 # Local Imports
 from spec_func import bin_spec
 from spec_func import bin_max_err
-import tsueqs_main_fns as tmf
+import eqs_main_fns as emf
 
 
 # working directory here
-working_dir = '/Users/tnye/kappa/data/waveforms'
+working_dir = '/home/tnye/kappa/'
 
 # path to corrected seismograms
-event_dirs = sorted(glob(working_dir + '/Event*'))
-outpath = working_dir + '/record_spectra'
+event_dirs = sorted(glob(working_dir + '/data/waveforms/filtered' + '/Event*'))
+outpath = working_dir + 'data/record_spectra'
 
 # Local Q
 Q = 427.5 
@@ -50,7 +50,7 @@ B = 3.1
 nbins = 150
 
 # Events flatfile
-event_df = pd.read_csv('/Users/tnye/kappa/data/SNR_5_file.csv')
+event_df = pd.read_csv(f'{working_dir}/data/flatfiles/SNR_5_file.csv')
 
 # Flatfile station and event data
 df_stns = np.array(event_df['Name'])
@@ -93,15 +93,16 @@ for i in range(len(event_dirs)):
     print('binning and fft of event: ' + event)
     
     # Get list of HNN files to obtain list of station names from 
-    recordpaths = glob(working_dir + '/Event_' + event +'/*_*_HHN*.sac')#full path for only specified channel
-    stns = [(x.split('/')[-1]).split('_')[1] for x in recordpaths]
-    
+    # recordpaths = glob(working_dir + 'data/waveforms/cut_WFs/Event_' + event +'/*_*_HHN*.sac')#full path for only specified channel
+    #stns = [(x.split('/')[-1]).split('_')[1] for x in recordpaths]
+    stns = np.unique(df_stns)
+
     # Loop through stations 
     for j in range(len(stns)):
         
         # Get East and North components
-        recordpath_E = glob(working_dir + '/Event_' + event +'/*_' + stns[j] + '_HHE*.sac')
-        recordpath_N = glob(working_dir + '/Event_' + event +'/*_' + stns[j] + '_HHN*.sac')
+        recordpath_E = glob(working_dir + '/data/waveforms/filtered/Event_' + event +'/*_' + stns[j] + '_HHE*.sac')
+        recordpath_N = glob(working_dir + '/data/waveforms/filtered/Event_' + event +'/*_' + stns[j] + '_HHN*.sac')
         
         # Make sure both a North and East component exist
         if(len(recordpath_E) == 1 and len(recordpath_N) == 1):
@@ -131,7 +132,7 @@ for i in range(len(event_dirs)):
             stelv = df_stelvs[np.where(df_stns==stns[j])[0][0]]/1000
             
             # Calculate hypocentral distance (km)
-            rhyp = tmf.compute_rhyp(stlon, stlat, stelv, hyplon, hyplat, hypdepth)
+            rhyp = emf.compute_rhyp(stlon, stlat, stelv, hyplon, hyplat, hypdepth)
             
             
             ############## Begin fourier transform to get spectra #############
@@ -175,7 +176,7 @@ for i in range(len(event_dirs)):
                 sigma = np.sqrt((spec_array_N/data_NE**2.)*sigmaN + ((spec_array_E/data_NE**2.)*sigmaE))
                 
                 # Remove path
-                data_NE = data_NE/(np.exp(-np.pi*rhyp*freq_NE/Q*B))
+#                data_NE = data_NE/(np.exp(-np.pi*rhyp*freq_NE/Q*B))
                 
                 #0.1-end
                 bins, binned_data = bin_spec(data_NE[6:-1], freq_NE[6:-1], num_bins=nbins)
